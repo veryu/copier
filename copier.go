@@ -47,6 +47,7 @@ type Option struct {
 	// Custom field name mappings to copy values with different names in `fromValue` and `toValue` types.
 	// Examples can be found in `copier_field_name_mapping_test.go`.
 	FieldNameMapping []FieldNameMapping
+	Filter           func(field reflect.StructField) bool
 }
 
 func (opt Option) converters() map[converterPair]TypeConverter {
@@ -332,6 +333,9 @@ func copier(toValue interface{}, fromValue interface{}, opt Option) (err error) 
 
 				// Check if we should ignore copying
 				if (fieldFlags & tagIgnore) != 0 {
+					continue
+				}
+				if opt.Filter != nil && !opt.Filter(field) {
 					continue
 				}
 
